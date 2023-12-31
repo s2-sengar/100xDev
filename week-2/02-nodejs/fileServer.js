@@ -11,11 +11,57 @@
      Example: GET http://localhost:3000/file/example.txt
     - For any other route not defined in the server return 404
     Testing the server - run `npm run test-fileServer` command in terminal
- */
+    
+**/
 const express = require('express');
 const fs = require('fs');
-const path = require('path');
 const app = express();
 
+const router=express.Router();
 
+const getFileList=(path)=>{
+  return new Promise((resolve,reject)=>{
+    fs.readdir(path,(err,res)=>{
+      if(err){
+        reject(err)
+      }
+      resolve(res);
+    })
+  })
+}
+
+const getFileContent=(path)=>{
+  return new Promise((resolve, reject) => {
+    fs.readFile(path,'utf-8',(err,res)=>{
+      if(err) reject(err);
+      resolve(res)
+    })
+  })
+}
+
+router.route('/files')
+  .get(async(req,res)=>{
+    try {
+      const fileList=await getFileList('./files')
+      res.status(200).json(fileList)
+    } catch (error) {
+      res.status(500).json(error)
+    }
+  
+  })
+
+router.route('/file/:fileName').get(async(req,res)=>{
+  try {
+    const result=await getFileContent(`./files/${req.params?.fileName}`)
+    res.status(200).send(result)
+  } catch (error) {
+    res.status(404).send("File not found")
+  }
+})
+
+router.route('**').get(async(req,res)=>{
+  res.status(404).send('Route not found')
+})
+
+app.use(router)
 module.exports = app;

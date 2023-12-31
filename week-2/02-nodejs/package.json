@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-fileServer": "./node_modules/jest/bin/jest.js ./tests/fileServer.test.js",
-    "test-todoServer": "./node_modules/jest/bin/jest.js ./tests/todoServer.test.js"
+    "test-fileServer": "C:/Users/sudha/Desktop/100xDev/week-2/02-nodejs/node_modules/jest/bin/jest.js C:/Users/sudha/Desktop/100xDev/week-2/02-nodejs/tests/fileServer.test.js",
+    "test-todoServer": "C:/Users/sudha/Desktop/100xDev/week-2/02-nodejs/node_modules/jest/bin/jest.js C:/Users/sudha/Desktop/100xDev/week-2/02-nodejs/tests/todoServer.test.js"
   },
   "keywords": [],
   "author": "",
