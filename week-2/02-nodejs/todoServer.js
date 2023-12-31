@@ -39,11 +39,114 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs=require('fs')
+const app = express();
+const router=express.Router();
+
+app.use(bodyParser.json());
+
+const readToDos=()=>{
+  return new Promise((resolve,reject)=>{
+    fs.readFile('todos.json','utf-8',(err,res)=>{
+      if(err) reject(err)
+      else resolve(JSON.parse(res))
+    })
+  })
+}
+
+const updateToDos=(data)=>{
+  return new Promise((resolve,reject)=>{
+    fs.writeFile('todos.json',data,(err)=>{
+      console.log(err)
+      if(err) reject(err)
+      else resolve()
+    })
+  })
+}
+
+router.route('/todos')
+  .get(async(req,res)=>{
+    try {
+      let todos= await readToDos();
+      res.status(200).json(todos)
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  })
+  .post(async(req,res)=>{
+    try {  
+      let {title,completed,description}=req.body;
+      let todos=await readToDos();
+      let lastId= todos.length ? todos.at(-1).id : 0;
+      todos.push({
+        id:(lastId*1)+1,
+        title,completed,description
+      })
+      await updateToDos(JSON.stringify(todos));
+      res.status(201).json({id:(lastId*1)+1})
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  })
+
+router.route('/todos/:id')
+  .get(async(req,res)=>{
+    try {
+      let {id}=req.params;
+      let todos=await readToDos();
+      let todo=todos.filter(todo=>todo.id==id)?.[0] ?? null;
+      if(todo){
+        return res.status(200).json(todo)
+      }
+      return res.status(404).send()
+    } catch (error) {
+      
+    }
+  })
+  .put(async(req,res)=>{
+    try {
+      let {id}=req.params;
+      let {title,completed,description}=req.body;
+      let todos=await readToDos();
+      let updatedTodo=null;
+      todos.forEach((todo)=>{
+        if(todo.id==id){
+          todo.title=title??todo.title
+          todo.completed=completed??todo.completed
+          todo.description=description??todo.description
+          updatedTodo=todo
+        }
+      })
+      if(updatedTodo){
+        console.log(todos)
+        await updateToDos(JSON.stringify(todos))
+        return res.status(200).json(updatedTodo)
+      }
+      return res.status(404).send('Todo not found')
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  })
+  .delete(async(req,res)=>{
+    try {
+      let {id}=req.params;
+      let todos=await readToDos();
+      let prevSize=todos.length;
+      todos=todos.filter(todo=>todo.id!=id)
+      await updateToDos(JSON.stringify(todos));
+      if(prevSize==todos.length){
+        return res.status(404).send('Todo not found');
+      }
+      return res.status(200).json({msg:'item was found and deleted'})
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  })
+
+
+
+app.use(router)
+// app.listen(3000)
+module.exports = app;
