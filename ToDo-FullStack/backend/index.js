@@ -4,6 +4,55 @@ const Todo=require('./db')
 const app=new express();
 const router=express.Router();
 
+// let i=0;
+// const heavyTask=()=>{
+//     return new Promise(resolve=>{
+//         for(let i=0;i<100000000000000000000000000000;i++){}
+//         resolve('Heavy task completed');
+//     })
+// }
+
+// router.route('/')
+//     .get(async(req,res)=>{
+//         i++;
+//         console.log(Date.now() +" - Recieved Request # " + " :::::: "+i);
+//         const task=await heavyTask();
+//         res.status(200).json({
+//             msg:'Hello',
+//             task
+//         })
+// postgresql://s2-sengar:mUjsMc3ZD2yY@ep-lingering-glade-34574938.us-east-2.aws.neon.tech/100xDev?sslmode=require
+// })
+const heavyTask = () => {
+    return new Promise(resolve => {
+        // Simulate a heavy asynchronous task
+        for (let i = 0; i < 1000000000000000000000; i++) {
+            // Heavy computation
+        }
+        resolve('Heavy task completed');
+    });
+};
+let requestCount = 0;
+router.route('/')
+    .get((req, res) => {
+        // Increment the request count
+        requestCount++;
+        console.log(Date.now() + " - Request received" + " :::::: " + requestCount);
+        res.status(202).json({ msg: 'Request accepted, processing task in background' }); // Immediate response
+        heavyTask()
+        .then(taskResult => {
+            console.log(taskResult)
+            res.status(200).json({
+            msg: 'Performed heavy task',
+            task: taskResult
+            }); // Final response with task result
+        })
+        .catch(error => {
+            // ...
+        });
+    });
+
+
 router.route('/todo')
     .get()
     
