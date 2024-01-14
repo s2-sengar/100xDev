@@ -21,7 +21,6 @@ const router=express.Router();
 //             msg:'Hello',
 //             task
 //         })
-// postgresql://s2-sengar:mUjsMc3ZD2yY@ep-lingering-glade-34574938.us-east-2.aws.neon.tech/100xDev?sslmode=require
 // })
 const heavyTask = () => {
     return new Promise(resolve => {
