@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const jwtPassword = 'secret';
-
+const passwordSchemaObject=require('./Validators/Schema/passwordSchemaValidatorObject')
+const usernameSchemaObject=require('./Validators/Schema/usenameSchemaValidatorObject')
 
 /**
  * Generates a JWT for a given username and password.
@@ -15,7 +16,21 @@ const jwtPassword = 'secret';
  */
 function signJwt(username, password) {
     // Your code here
+    let parsedUserName=usernameSchemaObject.safeParse(username)
+    if(!parsedUserName.success){
+        console.log('Invalid UserName ' +username)
+        return null;
+    }
+    let parsedPassword=passwordSchemaObject.safeParse(password)
+    if(!parsedPassword.success){
+        console.log('Invalid Password ' +username)
+        return null;
+    }
+    return jwt.sign({username},jwtPassword,{
+        noTimestamp:true
+    })
 }
+
 
 /**
  * Verifies a JWT using a secret key.
@@ -26,7 +41,13 @@ function signJwt(username, password) {
  *                    using the secret key.
  */
 function verifyJwt(token) {
-    // Your code here
+    try {
+        jwt.verify(token,jwtPassword)
+        return true
+    } catch (error) {
+        return false
+    }
+   
 }
 
 /**
@@ -38,7 +59,15 @@ function verifyJwt(token) {
  */
 function decodeJwt(token) {
     // Your code here
+    return jwt.decode(token)?true:false;
 }
+
+// let jwtToken=jwt.sign('ss97986@citi.com','randomPass')
+// console.log({jwtToken});
+// let isValidToken=verifyJwt(jwtToken);
+// console.log({isValidToken})
+// let decodedToken=decodeJwt(jwtToken);
+// console.log({decodedToken})
 
 
 module.exports = {
